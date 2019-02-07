@@ -1,0 +1,69 @@
+%matplotlib inline
+import matplotlib.pyplot as plt
+import numpy as np
+from math import sqrt
+
+def distance(point1, point2):
+    return sqrt( (point2[0]-point1[0])**2 + (point2[1]-point1[1])**2 )
+
+def find_closest_center(point, centers):
+    min_dist = 100
+    closest_center = 0
+    for j in range(4):
+        if distance(centers[j, :], point) < min_dist:
+            min_dist = distance(centers[j, :], point)
+            closest_center = j
+            
+    return closest_center
+
+def mean_point(lis):
+    total_x = 0
+    total_y = 0
+    for elem in lis:
+        x, y = elem
+        total_x += x
+        total_y += y
+        
+    average_x = total_x/len(lis)
+    average_y = total_y/len(lis)
+    average = [round(average_x, 1), round(average_y, 1)]
+    return average
+
+
+n_samples = 150
+
+X = np.zeros((n_samples, 2))
+
+for i in range(0, n_samples):
+    X[i, :] = [uniform(-5.0, 5.0), uniform(-5.0, 5.0)]
+    
+plt.scatter(X[:, 0], X[:, 1])
+
+centers = np.zeros((4, 2))
+centers[0, :] = X[0, :]
+centers[1, :] = X[30, :]
+centers[2, :] = X[60, :]
+centers[3, :] = X[90, :]
+
+clusters = [[], [], [], []]
+labels = np.zeros((X.shape[0], 1))
+
+i = 0
+while i < 4:
+    
+    for p in range(X.shape[0]):
+        closest_center = find_closest_center(X[p, :], centers)
+        if tuple(X[p, :]) not in clusters[closest_center]:
+            labels[p] = closest_center
+            clusters[closest_center].append(tuple(X[p, :]))
+
+    temp = mean_point(clusters[i])
+    if temp[0] != centers[i, 0] or temp[1] != centers[i, 1]:
+        centers[i, :] = temp
+        clusters = [[], [], [], []]
+        
+    else:
+        i += 1
+
+plt.scatter(X[:, 0], X[:, 1], c=labels, cmap='tab20c')
+plt.scatter(centers[:, 0], centers[:, 1], c='red', s=100)
